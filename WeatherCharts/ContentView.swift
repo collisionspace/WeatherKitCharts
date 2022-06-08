@@ -21,8 +21,8 @@ struct ContentView: View {
             Chart(fetcher.dailyTemperatures) { daily in
                 RuleMark(
                     x: .value("Day", daily.day),
-                    yStart: .value("Low temperature", daily.min),
-                    yEnd: .value("High temperature", daily.max)
+                    yStart: .value("High temperature", daily.max),
+                    yEnd: .value("Low temperature", daily.min)
                 )
                 .foregroundStyle(.black)
 
@@ -38,8 +38,6 @@ struct ContentView: View {
                 )
                 .foregroundStyle(by: .value("High", daily.max))
             }
-//            .chartYScale(range: .init(-2..<11))
-            
         }
         .padding(.all, 32)
         .task {
@@ -61,14 +59,6 @@ var dateFormatter: DateFormatter = {
     return formatter
 }()
 
-struct HourlyTemperature: Identifiable {
-    let temperature: Double
-    let time: Date
-    let hour: String
-
-    var id: String { UUID().uuidString }
-}
-
 struct DailyTemperature: Identifiable {
     let day: Date
     let min: Double
@@ -78,58 +68,26 @@ struct DailyTemperature: Identifiable {
 }
 
 class WeatherFetcher: ObservableObject {
-
-    @Published var temperatures: [HourlyTemperature] = []
-    
     @Published var dailyTemperatures: [DailyTemperature] = []
-
-
-    func fetchHourly() async {
-        let weatherService = WeatherService()
-        let melbourne = CLLocation(latitude: -37.815018, longitude: 144.946014)
-
-        let weather = try! await weatherService.weather(for: melbourne)
-
-        let currentWeather = weather.currentWeather
-//        print(currentWeather)
-        
-        let daily = weather.dailyForecast
-        print(daily.forecast)
-
-        let hourlyTemp = Array(weather.hourlyForecast.prefix(5)).map {
-            HourlyTemperature(
-                temperature: $0.temperature.value,
-                time: $0.date,
-                hour: dateFormatter.string(from: $0.date))
-        }
-//        print(hourlyTemp)
-        DispatchQueue.main.async {
-            self.temperatures = hourlyTemp
-        }
-    }
 
     func fetchDaily() async {
         let weatherService = WeatherService()
         let melbourne = CLLocation(latitude: -37.815018, longitude: 144.946014)
 
         let weather = try! await weatherService.weather(for: melbourne)
-
-//        let currentWeather = weather.currentWeather
-//        print(currentWeather)
         
-        let daily = weather.dailyForecast.forecast
-        print(daily)
+        let dailyForecasts = weather.dailyForecast.forecast
 
-        let dailyTemp = Array(daily.prefix(5)).map {
+        let dailyTemperatures = Array(dailyForecasts.prefix(5)).map {
             DailyTemperature(
                 day: $0.date,
                 min: $0.lowTemperature.value,
                 max: $0.highTemperature.value
             )
         }
-//        print(hourlyTemp)
+
         DispatchQueue.main.async {
-            self.dailyTemperatures = dailyTemp
+            self.dailyTemperatures = dailyTemperatures
         }
     }
 }
