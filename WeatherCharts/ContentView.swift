@@ -63,8 +63,7 @@ struct DailyTemperature: Identifiable {
     let day: Date
     let min: Double
     let max: Double
-
-    var id: String { UUID().uuidString }
+    let id: String
 }
 
 class WeatherFetcher: ObservableObject {
@@ -82,7 +81,8 @@ class WeatherFetcher: ObservableObject {
             DailyTemperature(
                 day: $0.date,
                 min: $0.lowTemperature.value,
-                max: $0.highTemperature.value
+                max: $0.highTemperature.value,
+                id: UUID().uuidString
             )
         }
 
