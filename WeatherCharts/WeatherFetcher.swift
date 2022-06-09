@@ -10,7 +10,7 @@ import WeatherKit
 import CoreLocation
 
 final class WeatherFetcher: ObservableObject {
-    @Published var dailyTemperatures: [DailyTemperature] = []
+    @Published var dailyTemperatures: [DailyTemperature]
 
     init(dailyTemperatures: [DailyTemperature] = []) {
         self.dailyTemperatures = dailyTemperatures
@@ -25,21 +25,26 @@ final class WeatherFetcher: ObservableObject {
         let weatherService = WeatherService()
         let melbourne = CLLocation(latitude: -37.815018, longitude: 144.946014)
 
-        let weather = try! await weatherService.weather(for: melbourne)
-        
-        let dailyForecasts = weather.dailyForecast.forecast
-
-        let dailyTemperatures = Array(dailyForecasts.prefix(5)).map {
-            DailyTemperature(
-                day: $0.date,
-                min: $0.lowTemperature.value,
-                max: $0.highTemperature.value,
-                id: UUID().uuidString
-            )
-        }
-
-        DispatchQueue.main.async {
-            self.dailyTemperatures = dailyTemperatures
+        do {
+            let weather = try await weatherService.weather(for: melbourne)
+            
+            let dailyForecasts = weather.dailyForecast.forecast
+            
+            let dailyTemperatures = Array(dailyForecasts.prefix(5)).map {
+                DailyTemperature(
+                    day: $0.date,
+                    min: $0.lowTemperature.value,
+                    max: $0.highTemperature.value,
+                    id: UUID().uuidString
+                )
+            }
+            
+            DispatchQueue.main.async {
+                self.dailyTemperatures = dailyTemperatures
+            }
+        } catch {
+            // Would be better to handle the error
+            print(error)
         }
     }
 }

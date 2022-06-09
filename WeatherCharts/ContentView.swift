@@ -20,9 +20,10 @@ struct ContentView: View {
             Text("Melbourne daily temps")
                 .font(.title)
                 .frame(maxWidth: .infinity, alignment: .leading)
+
             Chart(fetcher.dailyTemperatures) { daily in
                 // Can replace with BarMark, RuleMark, and AreaMark
-                RuleMark(
+                BarMark(
                     x: .value("Day", daily.day, unit: .day),
                     yStart: .value("High temperature", daily.max),
                     yEnd: .value("Low temperature", daily.min)
@@ -42,7 +43,9 @@ struct ContentView: View {
                 )
                 .foregroundStyle(by: .value("High", daily.max))
             }
-            .chartYScale(domain: fetcher.dailyTemperatures.temperatureRange())
+            .chartYScale(
+                domain: fetcher.dailyTemperatures.temperatureRange()
+            )
             .chartYAxis {
                 AxisMarks(position: .leading)
             }
