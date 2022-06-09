@@ -6,8 +6,6 @@
 //
 
 import SwiftUI
-import WeatherKit
-import CoreLocation
 import Charts
 
 struct ContentView: View {
